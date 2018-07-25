@@ -26,7 +26,7 @@ def SeabornPairGridWrapper(*args, **kwargs):
 def kMeansClusterEvolutionOnPairGrid(axes, allCentroids, **kwargs):
 
     clustColors = kwargs.pop('clustColors', {} )
-    edgeColor   = kwargs.pop('edgeColor', 'white')
+    edgeColor   = kwargs.pop('edgeColor', 'yellow')
     markerStyle = kwargs.pop('markerStyle', 'X')
     alpha       = kwargs.pop('alpha', 1)
     nClusters   = kwargs.pop('nClusters', len(allCentroids[0]))
@@ -41,7 +41,7 @@ def kMeansClusterEvolutionOnPairGrid(axes, allCentroids, **kwargs):
     # plot cluster centroids
     gridRank = len(axes)
     upprAxes = [(i,j) for i in range(gridRank) for j in range(gridRank) if i<j]
-    # lowrAxes = [(i,j) for i in range(gridRank) for j in range(gridRank) if i>j]
+    lowrAxes = [(i,j) for i in range(gridRank) for j in range(gridRank) if i>j]
 
     for itNum, centroids in enumerate(allCentroids):
 
@@ -49,10 +49,10 @@ def kMeansClusterEvolutionOnPairGrid(axes, allCentroids, **kwargs):
 
             cntroid = centroids[clustIdx]
 
-            for (rIdx,cIdx) in upprAxes:
+            for (rIdx,cIdx) in upprAxes + lowrAxes:
 
                 axs = axes[rIdx][cIdx]
-
+                
                 cnx = cntroid[cIdx]
                 cny = cntroid[rIdx]
 
@@ -63,13 +63,6 @@ def kMeansClusterEvolutionOnPairGrid(axes, allCentroids, **kwargs):
                                alpha = alpha, zorder = itNum + 1)
 
                 axs.scatter(cnx,cny,**pltArgs)
-
-                if saveSubPlot:
-
-                    fName = 'kmClEvolution-%s-%s-%s.pdf'%(ftureNames[rIdx],ftureNames[cIdx],subPlotSufx)
-
-                    ext = axs.get_window_extent().transformed(fg.dpi_scale_trans.inverted())
-                    axs.get_figure().savefig(fName, bbox_inches=ext.expanded(1.35, 1.3))
 
 
 class PyPlotScatterWraper():

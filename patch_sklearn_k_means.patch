@@ -1,0 +1,27 @@
+475a476,477
+>     evolution = []
+>     
+509c511,515
+<             
+---
+> 
+>         # keep track of the cluster evolution
+>         evolution += [{'centers': [[float(c) for c in cntrs] for cntrs in centers.copy()],
+>                        'labels':  [int(l) for l in labels.copy()],
+>                        'inertia': float(inertia)}]
+516a523
+> 
+526a534,546
+>         evolution[-1]['labels']  = [int(l) for l in best_labels.copy()]
+>         evolution[-1]['inertia'] = float(best_inertia)
+> 
+>     # save
+>     # TODO: append to json per iteration instead in order to save runtime memory
+>     try:
+>         import json
+>         with open('km_cluster_evolution_inertia=%s.json'%best_inertia,'w') as fl:
+>             json.dump(evolution, fl)
+> 
+>     except Exception as err:
+>         msg = (err.__class__.__name__, ' '.join(err.args))
+>         print('Cought exception while trying to persist cluster evolution: "%s: %s"'%msg)

@@ -11,15 +11,16 @@
 >                        'inertia': float(inertia)}]
 516a523
 > 
-526a534,546
+526a534,547
 >         evolution[-1]['labels']  = [int(l) for l in best_labels.copy()]
 >         evolution[-1]['inertia'] = float(best_inertia)
 > 
 >     # save
 >     # TODO: append to json per iteration instead in order to save runtime memory
+>     call_index = globals()['_kmeans_single_lloyd'].calls
 >     try:
 >         import json
->         with open('km_cluster_evolution_inertia=%s.json'%best_inertia,'w') as fl:
+>         with open('km_cluster_evolution_call_idx=%s_inertia=%s.json'%(call_index,best_inertia),'w') as fl:
 >             json.dump(evolution, fl)
 > 
 >     except Exception as err:

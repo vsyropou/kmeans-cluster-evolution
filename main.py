@@ -2,36 +2,34 @@
 from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
 from scipy import sparse
+from glob import glob
 
 import numpy as np
 import pandas as  pd
 import seaborn as sns
-
+import json
 
 from plotting import SeabornPairGridWrapper, kMeansClusterEvolutionOnPairGrid
+from decorators import *
 
-# read data
-# data = pd.read_json('dwh-user-features.json', orient='columns')
-# ftrs = ['AssessmentsProgressed','AveragePassScore']
-
-means = [0, 1]
-cov = [[1,0.5],[0.5,1]]
+# generate toy data
+means = [0, 1]#, 2]
+cov = [[1,0.1],[0.1,1]] # [[1,0.5, 0.2],[0.5,1,0.2], [0.2,0.5,1] ]
 ftrs = ['Feature_1', 'Feature_2']
 data = pd.DataFrame(np.random.multivariate_normal(mean=means,cov=cov,size=500),
                     columns = ftrs)
 
 
-
 # configuration
-cluster_color = { 0: 'purple', 1: 'blue'}
-cluster_cmaps = { 0: 'Purples', 1: 'Blues'}
+cluster_color = { 0: 'purple', 1: 'blue', 2: 'green'}
+cluster_cmaps = { 0: 'Purples', 1: 'Blues', 2: 'Greens'}
 kmclusterName = 'kmCluster'
 pGdiagHistBins = 15
 
 train_data = data[ftrs]
 
 # run kmeans
-km = KMeans(n_clusters=2,
+km = KMeans(n_clusters=len(ftrs),
             verbose = True,
             n_jobs = 1,
             algorithm='full'
@@ -43,14 +41,14 @@ plot_data = data[ftrs+[kmclusterName]]
 
 
 
+# parse cluster evolution data
+#  read all json files
+evolution_files = map(lambda jn: json.load(open(jn,'r')), glob('*.json'))
+#  choose the best iteration (same logic as standard kmeans)
+evolution_data = list(filter(lambda jstr: any([ jsn_ith_iter['inertia'] == km.inertia_ for jsn_ith_iter in jstr]), evolution_files))[0]
 
-import json
-evolution_data = json.load(open('km_cluster_evolution_inertia=%s.json'%km.inertia_, 'r'))
 
-# best_iteration_key = min(map(lambda e: e['inertia'],evolution_data))
-last_iteration_key = km.inertia_
-
-# append data means to centroinds coordiantes
+# append data means to centroinds coordiantes, same as standard k means
 _ar = lambda x: np.array(x)
 data_means = train_data.mean(axis=0)
 
@@ -65,16 +63,11 @@ else:
         
 
 
-
-
-# check last iteration is the same as the km result
+# check if last iteration is the same as the km result
 assert all(evolution_data[-1]['labels'] == km.labels_), 'labels'
 assert evolution_data[-1]['inertia'] == km.inertia_, 'inertia'
 assert all((_ar(cluster_centers_evolution[-1]) - km.cluster_centers_ <= 1e-5).flatten()), 'centers'
 
-
-
-# assert False
 
 # plot
 wrapperPairGridArgs = [plot_data, plt.scatter, sns.kdeplot, sns.kdeplot]

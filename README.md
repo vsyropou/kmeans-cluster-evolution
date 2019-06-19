@@ -1,9 +1,35 @@
-The code in this repository patches and decorates the standard scikit-learn kmeans_single_lloyd clustering algorithm such that you get back the evolution of the cluster centroids at each iteration. One could use this information to visualize the convergence of the kmeans algorithm. I suspect that this feature is not officialy supported in order to save memory in cases of large datasets. Given that you will need to patch the standard scikit-learn package in order to avoid messign it up, it is recomended that you setup a seperate environment where you can run apply the patch.
 
-To apply the patch run: patch <original_file_path> <patch_file>, where <orignal_file_path> is the location of the k_means_.py fileof the standard scikit-learn package. The file is located under the site-packages directory, site-packages/sklearn/cluster/k_means_.py. If you are using anaconda that could be something like ~/anaconda3/envs/<envirnment-name>/lib/python3.6/site-packages/sklearn/cluster/k_means_.py.
+Isn't annoying that you cannot see how the cluster positions evolve through each iteration of the kmeans algorithm in the scikit-learn package? Well, for those who cannot stand black boxes when it especially comes to the topic of algorithm coenvergence, here is a handy, but a bit nasty hack.
 
-Having succesfully applied the patch, you could go on and run an example by running the main.py file of this repository.
+In order to get the cluster evolution:
 
-The script will generate test data, run kmeans and plot the evolution of clusters on top of a seaborn PairGrid.
+- Clone this repo
+- Optional: Make a python virtual environment using the requirements file in the cloned repo, as you will be patching the standard scikit-learn module. If you are using virtualenvwrapper then this is just a line
 
-Cluster centroids evolution information is dumped as a json file. Each json file corresponds to a seperate kmeans initilization. Scikit-learn chooses the best iteration that has the smallest inertia. The same criterion is applied in the main.py scipt as well. Keep in mind that only the single threaded kmneas, n_jobs=1, was tested. 
+```bash
+mkvirtualenv -r requirements.txt <env-name>
+```
+  
+- Navigate to the sklearn library directory. It should be something like: "lib/python3.6/site-packages/sklearn/cluster"  Tip: use `which python` so that you get a hint on the location.
+
+- You are in the correct directory if you can see the k_means_.py file, which is the one we woudl liek to patch.
+- Apply the patch  by typing 
+
+```bash
+patch -p9 -b k_means_.py <  <this-repo-path>/kmeans-cluster-evolution/patch_sklearn_k_means.patch
+```
+
+- Return to the repo directory and install the package
+
+```bash
+pip install .
+```
+
+Run an example:
+```bash
+python -i <this-repo-path>/examples/main.py
+```
+
+The examples script will generate test data, run kmeans and plot the evolution of clusters on top of a seaborn PairGrid.
+
+This patching will probably reduce hte performance of the algorithm and it cannot run in parallel mode of k_means. It might serve you in case you want to check convergece or visulaize on small scale kmenas runs before the big one. 

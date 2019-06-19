@@ -5,8 +5,9 @@ In order to get the cluster evolution:
 
 - Clone this repo
 - Optional: Make a python virtual environment using the requirements file in the cloned repo, as you will be patching the standard scikit-learn module. If you are using virtualenvwrapper then this is just a line
-
+```bash
 mkvirtualenv -r requirements.txt <env-name>
+```
   
 - Navigate to the sklearn library directory. It should be something like: "lib/python3.6/site-packages/sklearn/cluster"  Tip: use `which python` so that you get a hint on the location.
 

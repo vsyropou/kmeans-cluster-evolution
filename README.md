@@ -34,4 +34,4 @@ The examples script will generate test data, run kmeans and plot the evolution o
 
 This patching will probably reduce hte performance of the algorithm and it cannot run in parallel mode of k_means. It might serve you in case you want to check convergece or visulaize on small scale kmenas runs before the big one.
 
-![Alt Text](https://raw.githubusercontent.com/vsyropou/kmeans-cluster-evolution/master/examples/evolution.pdf)
+![Alt Text](https://raw.githubusercontent.com/vsyropou/kmeans-cluster-evolution/master/examples/evolution.png)

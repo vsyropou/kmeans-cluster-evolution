@@ -1,16 +1,18 @@
 
 from sklearn.cluster import KMeans
 from matplotlib import pyplot as plt
-from scipy import sparse
+
 from glob import glob
 
 import numpy as np
 import pandas as  pd
 import seaborn as sns
+
+import os
 import json
 
-from plotting import SeabornPairGridWrapper, kMeansClusterEvolutionOnPairGrid
-from kmeans_cluster_evolution import kmeans_single_lloyd_decorator
+from kmeans_cluster_evolution.plotting import SeabornPairGridWrapper, kMeansClusterEvolutionOnPairGrid
+from kmeans_cluster_evolution.utilities import parse_evolution_files
 
 # generate toy data
 means = [0, 1]#, 2]
@@ -40,33 +42,12 @@ data[kmclusterName] = km.labels_
 plot_data = data[ftrs+[kmclusterName]]
 
 
+# read all json files
+evolution_files = map(lambda jn: json.load(open(jn,'r')), glob('*.json'))
+
 
 # parse cluster evolution data
-#  read all json files
-evolution_files = map(lambda jn: json.load(open(jn,'r')), glob('*.json'))
-#  choose the best iteration (same logic as standard kmeans)
-evolution_data = list(filter(lambda jstr: any([ jsn_ith_iter['inertia'] == km.inertia_ for jsn_ith_iter in jstr]), evolution_files))[0]
-
-
-# append data means to centroinds coordiantes, same as standard k means
-_ar = lambda x: np.array(x)
-data_means = train_data.mean(axis=0)
-
-if not sparse.issparse(data):
-
-    cluster_centers_evolution = []
-    for i_th_centroids in [dct['centers'] for dct in evolution_data]:
-        cluster_centers_evolution += [ list(map(lambda cntrd: cntrd + _ar(data_means), _ar(i_th_centroids)))]
-
-else:
-    cluster_centers_evolution = [dct['centers'] for dct in evolution_data]
-        
-
-
-# check if last iteration is the same as the km result
-assert all(evolution_data[-1]['labels'] == km.labels_), 'labels'
-assert evolution_data[-1]['inertia'] == km.inertia_, 'inertia'
-assert all((_ar(cluster_centers_evolution[-1]) - km.cluster_centers_ <= 1e-5).flatten()), 'centers'
+cluster_centers_evolution = parse_evolution_files(evolution_files, km, train_data)
 
 
 # plot
@@ -91,8 +72,12 @@ plt.ion()
 plot = SeabornPairGridWrapper(*wrapperPairGridArgs,
                               **wrapperPairGridKwargs)
 
-for idx, centroids in enumerate(cluster_centers_evolution):
-    kMeansClusterEvolutionOnPairGrid(plot.axes,
-                                     [centroids],
-                                     clustColors = cluster_color)
-    plot.savefig('%s.pdf'%idx)
+
+kMeansClusterEvolutionOnPairGrid(plot.axes,
+                                 cluster_centers_evolution,
+                                 clustColors = cluster_color,
+                                 saveall=True)
+
+
+# clean up
+os.system('rm -f *.json')

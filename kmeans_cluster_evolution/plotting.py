@@ -19,7 +19,7 @@ def SeabornPairGridWrapper(*args, **kwargs):
     plot.map_diag(diaFunc, **mapDiagArgs)
     plot.map_lower(lowFunc, **mapLowerArgs)
     plot.map_upper(uppFunc, **mapUpperArgs)
-    
+
     return plot
 
 
@@ -34,6 +34,8 @@ def kMeansClusterEvolutionOnPairGrid(axes, allCentroids, **kwargs):
     ftureNames  = kwargs.pop('featureNames', [])
     saveSubPlot = kwargs.pop('saveSubPlot', False)
     subPlotSufx = kwargs.pop('subPlotSufx', '')
+
+    saveall = kwargs.pop('saveall', True)
 
     if saveSubPlot:
         assert ftureNames, 'SubPlots will be overwritten if featureNames is not specified.'
@@ -52,14 +54,17 @@ def kMeansClusterEvolutionOnPairGrid(axes, allCentroids, **kwargs):
             for (rIdx,cIdx) in upprAxes + lowrAxes:
 
                 axs = axes[rIdx][cIdx]
-                
+                #import pdb; pdb.set_trace()                
                 cnx = cntroid[cIdx]
                 cny = cntroid[rIdx]
 
                 mrkCol = clustColors[clustIdx]
-                edgCol = mrkCol if itNum + 1 == len(allCentroids) else edgeColor
-
+                edgCol = edgeColor if itNum + 1 == len(allCentroids) else mrkCol
                 pltArgs = dict(c = mrkCol, edgecolor = edgCol, marker = 'X',
                                alpha = alpha, zorder = itNum + 1)
 
                 axs.scatter(cnx,cny,**pltArgs)
+
+        if saveall:
+            axs.figure.savefig('cluster_evolution_iter_%s.pdf'%itNum)
+                

@@ -5,6 +5,7 @@ In order to get the cluster evolution:
 
 - Clone this repo
 - Optional: Make a python virtual environment using the requirements file in the cloned repo, as you will be patching the standard scikit-learn module. If you are using virtualenvwrapper then this is just a line
+
 ```bash
 mkvirtualenv -r requirements.txt <env-name>
 ```
@@ -14,16 +15,20 @@ mkvirtualenv -r requirements.txt <env-name>
 - You are in the correct directory if you can see the k_means_.py file, which is the one we woudl liek to patch.
 - Apply the patch  by typing 
 
+```bash
 patch -p9 -b k_means_.py <  <this-repo-path>/kmeans-cluster-evolution/patch_sklearn_k_means.patch
+```
 
 - Return to the repo directory and install the package
 
+```bash
 pip install .
+```
 
 Run an example:
-
+```bash
 python -i <this-repo-path>/examples/main.py
-
+```
 
 The examples script will generate test data, run kmeans and plot the evolution of clusters on top of a seaborn PairGrid.
 

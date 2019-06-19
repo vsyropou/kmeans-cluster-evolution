@@ -1,28 +1,46 @@
-475a476,477
->     evolution = []
->     
-509c511,515
-<             
----
-> 
->         # keep track of the cluster evolution
->         evolution += [{'centers': [[float(c) for c in cntrs] for cntrs in centers.copy()],
->                        'labels':  [int(l) for l in labels.copy()],
->                        'inertia': float(inertia)}]
-516a523
-> 
-526a534,547
->         evolution[-1]['labels']  = [int(l) for l in best_labels.copy()]
->         evolution[-1]['inertia'] = float(best_inertia)
-> 
->     # save
->     # TODO: append to json per iteration instead in order to save runtime memory
->     call_index = globals()['_kmeans_single_lloyd'].calls
->     try:
->         import json
->         with open('km_cluster_evolution_call_idx=%s_inertia=%s.json'%(call_index,best_inertia),'w') as fl:
->             json.dump(evolution, fl)
-> 
->     except Exception as err:
->         msg = (err.__class__.__name__, ' '.join(err.args))
->         print('Cought exception while trying to persist cluster evolution: "%s: %s"'%msg)
+--- /home/vsyropou/.virtualenvs/sklearn/lib/python3.6/site-packages/sklearn/cluster/k_means_.py	2019-06-19 16:38:16.314822196 +0200
++++ /home/vsyropou/.virtualenvs/kmeans-cluster-evolution/lib/python3.6/site-packages/sklearn/cluster/k_means_.py	2019-06-19 15:08:35.727128646 +0200
+@@ -524,6 +524,9 @@
+     sample_weight = _check_sample_weight(X, sample_weight)
+ 
+     best_labels, best_inertia, best_centers = None, None, None
++
++    evolution = []
++
+     # init
+     centers = _init_centroids(X, n_clusters, init, random_state=random_state,
+                               x_squared_norms=x_squared_norms)
+@@ -554,6 +557,11 @@
+         if verbose:
+             print("Iteration %2d, inertia %.3f" % (i, inertia))
+ 
++        # keep track of the cluster evolution
++        evolution += [{'centers': [[float(c) for c in cntrs] for cntrs in centers.copy()],
++                       'labels':  [int(l) for l in labels.copy()],
++                       'inertia': float(inertia)}]
++
+         if best_inertia is None or inertia < best_inertia:
+             best_labels = labels.copy()
+             best_centers = centers.copy()
+@@ -574,6 +582,21 @@
+             _labels_inertia(X, sample_weight, x_squared_norms, best_centers,
+                             precompute_distances=precompute_distances,
+                             distances=distances)
++        
++        evolution[-1]['labels']  = [int(l) for l in best_labels.copy()]
++        evolution[-1]['inertia'] = float(best_inertia)
++
++    # save cluster evolution to json
++    # TODO: append to json per iteration instead in order to save runtime memory
++    call_index = globals()['_kmeans_single_lloyd'].calls
++    try:
++        import json
++        with open('km_cluster_evolution_call_idx=%s_inertia=%s.json'%(call_index,best_inertia),'w') as fl:
++            json.dump(evolution, fl)
++
++    except Exception as err:
++        msg = (err.__class__.__name__, ' '.join(err.args))
++        print('Cought exception while trying to persist cluster evolution: "%s: %s"'%msg)
+ 
+     return best_labels, best_inertia, best_centers, i + 1
+ 

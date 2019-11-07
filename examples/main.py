@@ -15,8 +15,9 @@ from kmeans_cluster_evolution.plotting import SeabornPairGridWrapper, kMeansClus
 from kmeans_cluster_evolution.utilities import parse_evolution_files
 
 # generate toy data
-means = [0, 1]#, 2]
-cov = [[1,0.1],[0.1,1]] # [[1,0.5, 0.2],[0.5,1,0.2], [0.2,0.5,1] ]
+means = [-2, 2]#, 2]
+cov = [[1, 0.3],
+       [0.3,  1]] # [[1,0.5, 0.2],[0.5,1,0.2], [0.2,0.5,1] ]
 ftrs = ['Feature_1', 'Feature_2']
 data = pd.DataFrame(np.random.multivariate_normal(mean=means,cov=cov,size=500),
                     columns = ftrs)
@@ -43,41 +44,45 @@ plot_data = data[ftrs+[kmclusterName]]
 
 
 # read all json files
-evolution_files = map(lambda jn: json.load(open(jn,'r')), glob('*.json'))
+evolution_files = [json.load(open(jn,'r')) for jn in glob('*.json')][-1]
 
 
-# parse cluster evolution data
-cluster_centers_evolution = parse_evolution_files(evolution_files, km, train_data)
-
-
-# plot
-wrapperPairGridArgs = [plot_data, plt.scatter, sns.kdeplot, sns.kdeplot]
-
-wrapperPairGridKwargs = {'pairGridKwargs' : dict(vars = ftrs,
-                                                 hue = kmclusterName,
-                                                 diag_sharey = False,
-                                                 palette = cluster_color,
-                                                 hue_kws = {'cmap' : cluster_cmaps }),
-                         'mapLowerKwargs' : dict(s = 1),
-                         'mapUpperKwargs' : dict(zorder = 0),
-                         # 'mapDiagKwargs'  : dict(bins = pGdiagHistBins,
-                         #                         # label = None,
-                         #                         # hist_kws = {},
-                         #                         # kde_kws = {'lw':1}
-#                          )
-                         }
+# # parse cluster evolution data
+# cluster_centers_evolution = parse_evolution_files(evolution_files, km, train_data)
 
 plt.ion()
+centroids = []
+for it_num, info in enumerate(evolution_files):
 
-plot = SeabornPairGridWrapper(*wrapperPairGridArgs,
-                              **wrapperPairGridKwargs)
+    inertia = info['inertia']
+
+    data_means = plot_data[ftrs].mean(axis=0).values
+    centroids  += [ [c + data_means for c in info['centers']] ]
+
+    plot_data['kmCluster'] = info['labels']
 
 
-kMeansClusterEvolutionOnPairGrid(plot.axes,
-                                 cluster_centers_evolution,
-                                 clustColors = cluster_color,
-                                 saveall=True)
+    wrapperPairGridArgs = [plot_data, plt.scatter, sns.kdeplot, sns.kdeplot]
+
+    wrapperPairGridKwargs = {'pairGridKwargs' : dict(vars = ftrs,
+                                                     hue = kmclusterName,
+                                                     diag_sharey = False,
+                                                     palette = cluster_color,
+                                                     hue_kws = {'cmap' : cluster_cmaps}),
+                             'mapLowerKwargs' : dict(s = 1),
+                             'mapUpperKwargs' : dict(zorder = 0)}
+
+    plot = SeabornPairGridWrapper(*wrapperPairGridArgs,
+                                  **wrapperPairGridKwargs)
+
+    kMeansClusterEvolutionOnPairGrid(plot.axes,
+                                     centroids,
+                                     clustColors = cluster_color,
+                                     saveall=False)
 
 
+    plot.fig.suptitle('Iteration %s ; Inertia=%.2f'%(it_num,inertia))
+
+    plot.fig.savefig('cluster_evolution_iter_%s.pdf'%it_num)
 # clean up
 os.system('rm -f *.json')

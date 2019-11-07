@@ -54,7 +54,7 @@ def kMeansClusterEvolutionOnPairGrid(axes, allCentroids, **kwargs):
             for (rIdx,cIdx) in upprAxes + lowrAxes:
 
                 axs = axes[rIdx][cIdx]
-                #import pdb; pdb.set_trace()                
+
                 cnx = cntroid[cIdx]
                 cny = cntroid[rIdx]
 
@@ -64,7 +64,6 @@ def kMeansClusterEvolutionOnPairGrid(axes, allCentroids, **kwargs):
                                alpha = alpha, zorder = itNum + 1)
 
                 axs.scatter(cnx,cny,**pltArgs)
-
+        
         if saveall:
-            axs.figure.savefig('cluster_evolution_iter_%s.pdf'%itNum)
-                
+            axs.figure.savefig('cluster_evolution_iter_%s.pdf'%itNum) 

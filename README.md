@@ -1,6 +1,6 @@
 
 Isn't annoying that you cannot see how the cluster positions evolve through each iteration of the kmeans algorithm in the scikit-learn package? 
-Would't it be nice if sklearn provided some handles so that you can visualize the convergence of kmeans cluster like the image below?
+Wouldn't it be nice if sklearn provided some handles so that you can visualize the convergence of kmeans cluster like the image below?
 
 ![all](https://github.com/vsyropou/kmeans-cluster-evolution/assets/7230298/e6b9b90c-3d4f-4b2a-891e-6b874756f7ae)
 
